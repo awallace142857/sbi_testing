@@ -129,10 +129,10 @@ def simulate_for_sbi_strict(simulator, proposal, num_simulations, max_trials=np.
 	x = torch.tensor(np.vstack(x))
 	return (theta, x)
 #sys.exit()          
-"""theta, x = simulate_for_sbi_strict(sbi_simulator, sbi_prior, num_simulations)
+theta, x = simulate_for_sbi_strict(sbi_simulator, sbi_prior, num_simulations)
 x_clean = noiseless_mags(theta[:,0],theta[:,1],theta[:,2],theta[:,3],theta[:,4])
 pickle.dump((theta, x, x_clean), open('sbi_theta_x_with_errors.pkl', 'wb'))
-#sys.exit()"""
+#sys.exit()
 (theta, x, x_clean) = pickle.load(open('sbi_theta_x_with_errors.pkl', 'rb'))
 #x = x[:,(0,1,2,3,9,10,11,12)]
 density_estimator = inference.append_simulations(theta, x).train()
