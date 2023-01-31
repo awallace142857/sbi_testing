@@ -119,7 +119,7 @@ def simulate_for_sbi_strict(simulator, proposal, num_simulations, max_trials=np.
 		theta.extend(np.array(_theta[keep]))
 		x.extend(x_arr[keep])
 		num_trials += 1
-		num_simulated += sum(keep)
+		num_simulated += len(keep)
 		if num_trials > max_trials:
 			print(f"Warning: exceeding max trials ({max_trials}) with {num_simulated} / {num_simulations} simulations")
 			break
