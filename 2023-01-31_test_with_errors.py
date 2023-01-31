@@ -26,21 +26,6 @@ bounds = np.array([
 
 ])
 
-(ids,real_x,real_coords) = pickle.load(open('../real_data_errs.pkl', 'rb'))
-delete = np.where(real_x[:,1:9]>20)[0]
-real_x = np.delete(real_x,list(set(delete)),axis=0)
-delete = np.where(real_x[:,9:18]>4)[0]
-real_x = np.delete(real_x,list(set(delete)),axis=0)
-delete = np.where(real_x[:,2]<5)[0]
-real_x = np.delete(real_x,list(set(delete)),axis=0)
-delete = np.where(real_x[:,1]-real_x[:,3]<-0.5)[0]
-real_x = np.delete(real_x,list(set(delete)),axis=0)
-delete = np.where(real_x[:,1]-real_x[:,3]>2)[0]
-real_x = np.delete(real_x,list(set(delete)),axis=0)
-real_mags = real_x[:,1:9]
-real_pars = real_x[:,0]
-real_errs = real_x[:,10:18]
-real_par_errs = real_x[:,9]
 tracks = get_ichrone('mist', tracks=True)
 def extinction(wavelength,distance):
 	return 0.014*(wavelength/4.64e-7)**(-1.5)
@@ -146,7 +131,7 @@ def simulate_for_sbi_strict(simulator, proposal, num_simulations, max_trials=np.
 #sys.exit()          
 """theta, x = simulate_for_sbi_strict(sbi_simulator, sbi_prior, num_simulations)
 x_clean = noiseless_mags(theta[:,0],theta[:,1],theta[:,2],theta[:,3],theta[:,4])
-pickle.dump((theta, x, x_clean), open('sbi_theta_x.pkl', 'wb'))
+pickle.dump((theta, x, x_clean), open('sbi_theta_x_with_errors.pkl', 'wb'))
 #sys.exit()"""
 (theta, x, x_clean) = pickle.load(open('sbi_theta_x_with_errors.pkl', 'rb'))
 #x = x[:,(0,1,2,3,9,10,11,12)]
