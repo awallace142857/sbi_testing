@@ -35,10 +35,12 @@ table_data = np.zeros((sample.shape[0],24))
 mags_s = model_mags(sample)
 mags_b = model_mags_bin(sample)
 print(x[1]-x[3],x[2]-5*np.log10(100./x[0]))
+if len(x)==9:
+	x = np.concatenate((x,np.zeros(9)))
 for jj in range(3):
 	print(np.std(mags_b[jj]))
 for jj in range(len(sample)):
-	table_data[jj] = [sample[jj][0],sample[jj][1],sample[jj][2],sample[jj][3],sample[jj][4],mags_s[0][jj],mags_b[0][jj],mags_s[1][jj],mags_b[1][jj],mags_s[2][jj],mags_b[2][jj],x[0],x[4],x[1],x[5],x[2],x[6],x[3],x[7],theta[0],theta[1],theta[2],theta[3],theta[4]]
+	table_data[jj] = [sample[jj][0],sample[jj][1],sample[jj][2],sample[jj][3],sample[jj][4],mags_s[0][jj],mags_b[0][jj],mags_s[1][jj],mags_b[1][jj],mags_s[2][jj],mags_b[2][jj],x[0],x[9],x[1],x[10],x[2],x[11],x[3],x[12],theta[0],theta[1],theta[2],theta[3],theta[4]]
 
 table_names = ['m1_sbi','q_sbi','age_sbi','feh_sbi','dist_sbi','b_single','b_binary','g_single','g_binary','r_single','r_binary','par_obs','par_err','b_obs','b_err','g_obs','g_err','r_obs','r_err','m1_true','q_true','age_true','feh_true','dist_true']
 source_table = Table(data=table_data,names=table_names)
@@ -65,28 +67,45 @@ true_theta[:, 2] += np.random.normal(0, 0.01, size=len(true_theta)) # age
 true_theta[:, 3] += np.random.normal(0, 0.01, size=len(true_theta)) # feh
 true_theta[:, 4] = 1000.0/np.random.normal(table["par_obs"][0], table["par_err"][0], size=len(true_theta)) # dist
 
-
 obs_photometry = np.random.normal(
     [table[f"{band}_obs"][0] for band in bands],
     [table[f"{band}_err"][0] for band in bands],
     size=(len(true_theta), len(bands))
 )
-
+print([table[f"{band}_obs"][0] for band in bands],[table[f"{band}_err"][0] for band in bands])
 true_chain = np.hstack([true_theta, obs_photometry])
 binary_chain = np.hstack([binary_theta, binary_photometry])
 single_chain = np.hstack([single_theta, single_photometry])
 parameters = sbi_labels + bands
 
-
 q = table["q_sbi"]
 
 c = ChainConsumer()
-#binary_chain+=np.random.normal(0,0.1,size=binary_chain.shape)
+#binary_chain+=np.random.normal(0,0.01,size=binary_chain.shape)
 c.add_chain(binary_chain, parameters=parameters, name=f"$q = {np.median(q):.1f}\pm {np.std(q):.1f}$")
 #c.add_chain(single_chain, parameters=parameters, name=r"$q=0$")
-#true_chain+=np.random.normal(0,0.1,size=true_chain.shape)
+true_chain+=np.random.normal(0,0.01,size=true_chain.shape)
 c.add_chain(true_chain, parameters=parameters, name="truth + data")
 c.configure(max_ticks=2, diagonal_tick_labels=False, tick_font_size=8)
 c.plotter.plot(filename=f"{basename}.png", figsize="column")
+plt.show()
+table = Table.read('sample_ex_with_errors.csv')
+theta_with_errors = np.array([table[f"{pn}_sbi"] for pn in sbi_labels]).T
+photometry_with_errors = np.array([table[f"{band}_binary"] for band in bands]).T
+chain_with_errors = np.hstack([theta_with_errors, photometry_with_errors])
+table = Table.read('sample_ex_no_errors.csv')
+theta_no_errors = np.array([table[f"{pn}_sbi"] for pn in sbi_labels]).T
+photometry_no_errors = np.array([table[f"{band}_binary"] for band in bands]).T
+chain_no_errors = np.hstack([theta_no_errors, photometry_no_errors])
+
+parameters = sbi_labels + bands
+
+c = ChainConsumer()
+#binary_chain+=np.random.normal(0,0.01,size=binary_chain.shape)
+c.add_chain(chain_no_errors, parameters=parameters, name=f"No Magnitude Error")
+c.add_chain(chain_with_errors, parameters=parameters, name=f"Magnitude Error = 0.01")
+#c.add_chain(single_chain, parameters=parameters, name=r"$q=0$")
+c.configure(max_ticks=2, diagonal_tick_labels=False, tick_font_size=8)
+c.plotter.plot(filename=f"compare.png", figsize="column")
 plt.show()
 sys.exit()
