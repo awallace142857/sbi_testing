@@ -116,24 +116,3 @@ sample = posterior.sample(
 		show_progress_bars=False
 	)
 pickle.dump((np.array(theta[ii]),np.array(x[ii]),np.array(sample)), open('sbi_ex_test_no_errors.pkl', 'wb'))
-sys.exit()
-#print(true_theta.shape,true_obs.shape)
-#all_samples = []
-for i, obs in enumerate(true_obs):
-	section = i//(int(num_injections/nSplit))
-	sample = posterior.sample(
-		(num_samples,),
-		x=obs,
-		show_progress_bars=False
-	)
-	if sample.shape[0]<num_samples:
-		sample = np.zeros((num_samples,true_theta.shape[1]))
-	os.system('rm -rf current_*')
-	textFile = open('current_'+str(i),'w')
-	if i==int(section*num_injections/nSplit):
-		all_samples = np.empty((int(num_injections/nSplit), num_samples, L))
-	all_samples[i-section*int(num_injections/nSplit)] = sample
-	if (i+1)%(num_injections/nSplit)==0:
-		start = i+1-int(num_injections/nSplit)
-		end = i+1
-		pickle.dump((np.array(true_theta[start:end]),np.array(true_obs[start:end]),np.array(all_samples)), open(saveDir+'/sbi_values_binary'+str(int(section))+'.pkl', 'wb'))
